@@ -1,0 +1,3 @@
+[submodule "CUDA_compat"]
+	path = CUDA_compat
+	url = https://github.com/been-jamming/CUDA_compat
