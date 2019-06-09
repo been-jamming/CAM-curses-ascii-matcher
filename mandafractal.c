@@ -57,7 +57,7 @@ int main(){
 	CAM_init();
 	keypad(stdscr, TRUE);
 
-	s = CAM_screen_create(stdscr, COLS, LINES);
+	s = CAM_screen_create(stdscr, COLS - 1, LINES);
 	while(key_hit != 'q'){
 		render(s, mandelbrot_iterations, center, width, num_iterations);
 		CAM_update(s);

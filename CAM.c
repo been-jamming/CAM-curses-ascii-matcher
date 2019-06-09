@@ -193,6 +193,7 @@ void CAM_update(CAM_screen *s){
 			attron(COLOR_PAIR(s->foreground[s->char_width*char_y + char_x]*8 + s->background[s->char_width*char_y + char_x] + 1));
 			wprintw(s->parent, "%c", s->current_characters[s->char_width*char_y + char_x]);
 		}
+		wprintw(s->parent, "\n");
 	}
 }
 

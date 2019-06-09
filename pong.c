@@ -82,7 +82,7 @@ int main(int argc, char *argv[]){
 	noecho();
 	keypad(stdscr, TRUE);
 	nodelay(stdscr, TRUE);
-	my_screen = CAM_screen_create(stdscr, COLS, LINES);
+	my_screen = CAM_screen_create(stdscr, COLS - 1, LINES);
 	player1_y = 0;
 	player2_y = 0;
 	ball_x = 50;
