@@ -7,6 +7,8 @@ Included is an example `pong.c` program, which on my machine with mingw32 and pd
 
 ```gcc CAM.c pong.c -lm -lpdcurses -Wall -O3 -o pong```
 
+There is also a `mandafractal.c` mandelbrot explorer program that can be compiled the same way as `pong.c`
+
 CAM should be compatible with any curses library.
 
 More improvements to come soon, including optimized rectangle drawing, circle and line algorithms.
