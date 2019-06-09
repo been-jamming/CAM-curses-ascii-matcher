@@ -2,14 +2,12 @@
 #include <stdint.h>
 #include <string.h>
 #include <curses.h>
-#include <time.h>
-#include <math.h>
-#include "console_graphics.h"
+#include "CAM.h"
 
 //Monospace font information
 #include "font.h"
 
-unsigned char init_screens(){
+unsigned char CAM_init(){
 	unsigned char i;
 	unsigned char j;
 	unsigned char k;
@@ -42,10 +40,10 @@ unsigned char init_screens(){
 	return 0;
 }
 
-screen *create_screen(WINDOW *parent, unsigned int char_width, unsigned int char_height){
-	screen *output;
+CAM_screen *CAM_screen_create(WINDOW *parent, unsigned int char_width, unsigned int char_height){
+	CAM_screen *output;
 
-	output = malloc(sizeof(screen));
+	output = malloc(sizeof(CAM_screen));
 	output->parent = parent;
 	output->char_width = char_width;
 	output->char_height = char_height;
@@ -61,7 +59,7 @@ screen *create_screen(WINDOW *parent, unsigned int char_width, unsigned int char
 	return output;
 }
 
-void free_screen(screen *s){
+void CAM_screen_free(CAM_screen *s){
 	free(s->do_update);
 	free(s->current_characters);
 	free(s->foreground);
@@ -70,7 +68,7 @@ void free_screen(screen *s){
 	free(s);
 }
 
-void screen_set_pix(screen *s, unsigned int x, unsigned int y, unsigned int color){
+void CAM_set_pix(CAM_screen *s, unsigned int x, unsigned int y, unsigned int color){
 	unsigned int char_x;
 	unsigned int char_y;
 	unsigned char char_x_offset;
@@ -86,7 +84,7 @@ void screen_set_pix(screen *s, unsigned int x, unsigned int y, unsigned int colo
 	s->do_update[s->char_width*char_y + char_x] = 1;
 }
 
-void screen_fill(screen *s, unsigned int color){
+void CAM_fill(CAM_screen *s, unsigned int color){
 	unsigned int i;
 	unsigned int j;
 	unsigned int k;
@@ -102,24 +100,18 @@ void screen_fill(screen *s, unsigned int color){
 	}
 }
 
-void screen_rect(screen *s, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, unsigned char color){
+void CAM_rect(CAM_screen *s, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, unsigned char color){
 	unsigned int x;
 	unsigned int y;
 
 	for(x = x1; x <= x2; x++){
 		for(y = y1; y <= y2; y++){
-			screen_set_pix(s, x, y, color);
+			CAM_set_pix(s, x, y, color);
 		}
 	}
 }
 
-void printb(uint64_t i, unsigned char count){
-	if(count)
-		printb(i>>1, count - 1);
-	printf("%d", (int) i&1);
-}
-
-void screen_update_char(screen *s, unsigned int char_x, unsigned int char_y){
+void CAM_update_char(CAM_screen *s, unsigned int char_x, unsigned int char_y){
 	uint64_t current_counts;
 	uint64_t current_row_count;
 	uint64_t reverse_counts;
@@ -187,7 +179,7 @@ void screen_update_char(screen *s, unsigned int char_x, unsigned int char_y){
 	s->do_update[s->char_width*char_y + char_x] = 0;
 }
 
-void screen_update(screen *s){
+void CAM_update(CAM_screen *s){
 	unsigned char char_x;
 	unsigned char char_y;
 
@@ -195,110 +187,12 @@ void screen_update(screen *s){
 	for(char_y = 0; char_y < s->char_height; char_y++){
 		for(char_x = 0; char_x < s->char_width; char_x++){
 			if(s->do_update[s->char_width*char_y + char_x]){
-				screen_update_char(s, char_x, char_y);
+				CAM_update_char(s, char_x, char_y);
 				s->do_update[s->char_width*char_y + char_x] = 0;
 			}
 			attron(COLOR_PAIR(s->foreground[s->char_width*char_y + char_x]*8 + s->background[s->char_width*char_y + char_x] + 1));
 			wprintw(s->parent, "%c", s->current_characters[s->char_width*char_y + char_x]);
 		}
 	}
-}
-
-screen *my_screen;
-unsigned int player1_y;
-unsigned int player2_y;
-int ball_x;
-int ball_y;
-double ball_dx = 1;
-double ball_dy = 1;
-unsigned int bat_height = 50;
-unsigned char quit;
-
-void game_tick(){
-	int pressed;
-	double r;
-
-	pressed = getch();
-	if(pressed == 'e' && player1_y){
-		player1_y -= 5;
-	} else if(pressed == 'c' && player1_y + bat_height < LINES*13 - 5){
-		player1_y += 5;
-	}
-	if(pressed == KEY_UP && player2_y){
-		player2_y -= 5;
-	} else if(pressed == KEY_DOWN && player2_y + bat_height < LINES*13 - 5){
-		player2_y += 5;
-	}
-	
-	if(pressed == 'q'){
-		quit = 1;
-	}
-
-	if(ball_dx + ball_x < 0){
-		if(ball_y + 5 >= player1_y && ball_y - 5 <= player1_y + bat_height){
-			r = ((double) rand())/RAND_MAX;
-			ball_dx = -ball_dx + r*r;
-		} else {
-			ball_dx = -ball_dx;
-			quit = 1;
-		}
-	}
-	if(ball_dx + ball_x > COLS*8 - 11){
-		if(ball_y + 5 >= player2_y && ball_y - 5 <= player2_y + bat_height){
-			r = ((double) rand())/RAND_MAX;
-			ball_dx = -ball_dx - r*r;
-		} else {
-			ball_dx = -ball_dx;
-			quit = 1;
-		}
-	}
-	if(ball_dy + ball_y < 0 || ball_dy + ball_y > LINES*13 - 11){
-		ball_dy = -ball_dy;
-	}
-
-	ball_x += ball_dx;
-	ball_y += ball_dy;
-
-	screen_fill(my_screen, COLOR_WHITE);
-	screen_rect(my_screen, 0, player1_y, 8, player1_y + bat_height, COLOR_BLUE);
-	screen_rect(my_screen, COLS*8 - 9, player2_y, COLS*8 - 1, player2_y + bat_height, COLOR_GREEN);
-	screen_rect(my_screen, ball_x, ball_y, ball_x + 10, ball_y + 10, COLOR_RED);
-	screen_update(my_screen);
-	refresh();
-}
-
-int main(int argc, char *argv[]){
-	initscr();
-	refresh();	
-	start_color();
-	init_screens();
-
-	struct timespec spec;
-	long last_frame;
-
-	srand(time(NULL));
-	cbreak();
-	noecho();
-	keypad(stdscr, TRUE);
-	nodelay(stdscr, TRUE);
-	my_screen = create_screen(stdscr, COLS, LINES);
-	player1_y = 0;
-	player2_y = 0;
-	ball_x = 50;
-	ball_y = 50;
-	quit = 0;
-	clock_gettime(CLOCK_MONOTONIC, &spec);
-	last_frame = round(spec.tv_nsec/1.0e6) + 1000*spec.tv_sec;
-
-	while(!quit){
-		clock_gettime(CLOCK_MONOTONIC, &spec);
-		if(round(spec.tv_nsec/1.0e6) + 1000*spec.tv_sec - last_frame > 20){
-			last_frame = round(spec.tv_nsec/1.0e6) + 1000*spec.tv_sec;
-			game_tick();
-		}
-	}
-	
-	endwin();
-	free_screen(my_screen);
 }
 
