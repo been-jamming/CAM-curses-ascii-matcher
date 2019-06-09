@@ -10,3 +10,5 @@ Included is an example `pong.c` program, which on my machine with mingw32 and pd
 CAM should be compatible with any curses library.
 
 More improvements to come soon, including optimized rectangle drawing, circle and line algorithms.
+
+See https://pasteboard.co/IiuKu8y.png for terminal pong screenshot.
