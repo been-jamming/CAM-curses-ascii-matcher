@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <curses.h>
 #include <complex.h>
+#include <math.h>
 #include "CAM.h"
 
 unsigned char color_scheme[7] = {COLOR_RED, COLOR_YELLOW, COLOR_WHITE, COLOR_GREEN, COLOR_MAGENTA, COLOR_CYAN, COLOR_BLUE};
@@ -37,7 +38,7 @@ void render(CAM_screen *s, unsigned int (*iterations)(complex double, unsigned i
 			if(num_iterations == max_iterations){
 				point_color = COLOR_BLACK;
 			} else {
-				point_color = color_scheme[num_iterations%7];
+				point_color = color_scheme[((unsigned int) floor(sqrt(num_iterations)))%7];
 			}
 
 			CAM_set_pix(s, x, y, point_color);
