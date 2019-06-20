@@ -76,7 +76,7 @@ int main(){
 
 	initscr();
 	start_color();
-	CAM_init();
+	CAM_init(1);
 	keypad(stdscr, TRUE);
 
 	s = CAM_screen_create(stdscr, COLS - 1, LINES);

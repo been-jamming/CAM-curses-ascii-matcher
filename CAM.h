@@ -16,17 +16,19 @@ struct CAM_screen{
 	uint64_t (*current_buffer)[13];
 };
 
-unsigned char CAM_init();
+unsigned char CAM_init(unsigned int start_color);
 
 CAM_screen *CAM_screen_create(WINDOW *parent, unsigned int char_width, unsigned int char_height);
 
 void CAM_screen_free(CAM_screen *s);
 
-void CAM_set_pix(CAM_screen *s, unsigned int x, unsigned int y, unsigned int color);
+void CAM_set_pix(CAM_screen *s, unsigned int x, unsigned int y, unsigned char color);
 
 void CAM_fill(CAM_screen *s, unsigned int color);
 
-void CAM_rect(CAM_screen *s, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, unsigned char color);
+void CAM_fill_char(CAM_screen *s, unsigned int char_x, unsigned int char_y, unsigned char color);
+
+void CAM_rect(CAM_screen *s, int x0, int y0, int x1,  int y1, unsigned char color);
 
 void CAM_update_char(CAM_screen *s, unsigned int char_x, unsigned int char_y);
 

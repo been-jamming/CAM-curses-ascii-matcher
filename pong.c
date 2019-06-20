@@ -44,7 +44,7 @@ void game_tick(){
 			quit = 1;
 		}
 	}
-	if(ball_dx + ball_x > COLS*8 - 11){
+	if(ball_dx + ball_x > COLS*8 - 19){
 		if(ball_y + 5 >= player2_y && ball_y - 5 <= player2_y + bat_height){
 			r = ((double) rand())/RAND_MAX;
 			ball_dx = -ball_dx - r*r;
@@ -62,8 +62,8 @@ void game_tick(){
 
 	CAM_fill(my_screen, COLOR_WHITE);
 	CAM_rect(my_screen, 0, player1_y, 8, player1_y + bat_height, COLOR_BLUE);
-	CAM_rect(my_screen, COLS*8 - 9, player2_y, COLS*8 - 1, player2_y + bat_height, COLOR_GREEN);
-	CAM_rect(my_screen, ball_x, ball_y, ball_x + 10, ball_y + 10, COLOR_RED);
+	CAM_rect(my_screen, COLS*8 - 17, player2_y, COLS*8 - 9, player2_y + bat_height, COLOR_GREEN);
+	CAM_rect(my_screen, ball_x, ball_y, ball_x + 7, ball_y + 7, COLOR_RED);
 	CAM_update(my_screen);
 	refresh();
 }
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){
 	initscr();
 	refresh();	
 	start_color();
-	CAM_init();
+	CAM_init(1);
 
 	struct timespec spec;
 	long last_frame;

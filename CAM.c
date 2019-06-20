@@ -7,7 +7,9 @@
 //Monospace font information
 #include "font.h"
 
-unsigned char CAM_init(){
+static unsigned int CAM_color_start;
+
+unsigned char CAM_init(unsigned int color_start){
 	unsigned char i;
 	unsigned char j;
 	unsigned char k;
@@ -18,13 +20,15 @@ unsigned char CAM_init(){
 		return 1;
 	}
 
-	current_color = 1;
+	current_color = color_start;
 	for(i = 0; i < 8; i++){
 		for(j = 0; j < 8; j++){
 			init_pair(current_color, i, j);
 			current_color++;
 		}
 	}
+
+	CAM_color_start = color_start;
 
 	for(i = 0; i < 96; i++){
 		for(j = 0; j < 13; j++){
@@ -68,7 +72,7 @@ void CAM_screen_free(CAM_screen *s){
 	free(s);
 }
 
-void CAM_set_pix(CAM_screen *s, unsigned int x, unsigned int y, unsigned int color){
+void CAM_set_pix(CAM_screen *s, unsigned int x, unsigned int y, unsigned char color){
 	unsigned int char_x;
 	unsigned int char_y;
 	unsigned char char_x_offset;
@@ -87,7 +91,7 @@ void CAM_set_pix(CAM_screen *s, unsigned int x, unsigned int y, unsigned int col
 void CAM_fill(CAM_screen *s, unsigned int color){
 	unsigned int i;
 	unsigned int j;
-	unsigned int k;
+	unsigned char k;
 
 	for(i = 0; i < s->char_width; i++){
 		for(j = 0; j < s->char_height; j++){
@@ -100,13 +104,83 @@ void CAM_fill(CAM_screen *s, unsigned int color){
 	}
 }
 
-void CAM_rect(CAM_screen *s, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, unsigned char color){
-	unsigned int x;
-	unsigned int y;
+void CAM_fill_char(CAM_screen *s, unsigned int char_x, unsigned int char_y, unsigned char color){
+	unsigned char i;
 
-	for(x = x1; x <= x2; x++){
-		for(y = y1; y <= y2; y++){
-			CAM_set_pix(s, x, y, color);
+	for(i = 0; i < 13; i++){
+		s->current_buffer[s->char_width*char_y + char_x][i] = 0xFFULL<<(8*color);
+	}
+	s->current_characters[s->char_width*char_y + char_x] = ' ';
+	s->background[s->char_width*char_y + char_x] = color;
+}
+
+void CAM_rect(CAM_screen *s, int x0, int y0, int x1, int y1, unsigned char color){
+	unsigned int char_x0;
+	unsigned int char_y0;
+	unsigned int char_x1;
+	unsigned int char_y1;
+	unsigned char edge_mask_x0;
+	unsigned char edge_mask_x1;
+	uint64_t edge_mask_x0_64 = 0;
+	uint64_t edge_mask_x1_64 = 0;
+	unsigned int char_x;
+	unsigned int char_y;
+	unsigned char current_mask;
+	uint64_t current_mask_64;
+	int min_y;
+	int max_y;
+	unsigned char i;
+
+	edge_mask_x0 = 0xFF>>(x0%8);
+	edge_mask_x1 = (0xFF<<(7 - x1%8))&0xFF;
+
+	for(i = 0; i < 8; i++){
+		edge_mask_x0_64 <<= 8;
+		edge_mask_x1_64 <<= 8;
+
+		edge_mask_x0_64 |= edge_mask_x0;
+		edge_mask_x1_64 |= edge_mask_x1;
+	}
+
+	char_x0 = x0/8;
+	char_y0 = y0/13;
+	char_x1 = x1/8;
+	char_y1 = y1/13;
+
+	for(char_y = char_y0; char_y <= char_y1; char_y++){
+		for(char_x = char_x0; char_x <= char_x1; char_x++){
+			if(char_x == char_x0 || char_x == char_x1 || char_y == char_y0 || char_y == char_y1){
+				if(char_x == char_x0 && char_x == char_x1){
+					current_mask = edge_mask_x0&edge_mask_x1;
+					current_mask_64 = edge_mask_x0_64&edge_mask_x1_64;
+				} else if(char_x == char_x0){
+					current_mask = edge_mask_x0;
+					current_mask_64 = edge_mask_x0_64;
+				} else if(char_x == char_x1){
+					current_mask = edge_mask_x1;
+					current_mask_64 = edge_mask_x1_64;
+				} else {
+					current_mask = 0xFF;
+					current_mask_64 = 0xFFFFFFFFFFFFFFFFULL;
+				}
+
+				min_y = 0;
+				max_y = 12;
+				if(char_y == char_y0){
+					min_y = y0%13;
+				}
+				if(char_y == char_y1){
+					max_y = y1%13;
+				}
+
+				for(i = min_y; i <= max_y; i++){
+					s->current_buffer[s->char_width*char_y + char_x][i] &= ~current_mask_64;
+					s->current_buffer[s->char_width*char_y + char_x][i] |= ((uint64_t) current_mask)<<(8*color);
+					s->do_update[s->char_width*char_y + char_x] = 1;
+				}
+			} else {
+				CAM_fill_char(s, char_x, char_y, color);
+			}
 		}
 	}
 }
@@ -190,7 +264,7 @@ void CAM_update(CAM_screen *s){
 				CAM_update_char(s, char_x, char_y);
 				s->do_update[s->char_width*char_y + char_x] = 0;
 			}
-			attron(COLOR_PAIR(s->foreground[s->char_width*char_y + char_x]*8 + s->background[s->char_width*char_y + char_x] + 1));
+			attron(COLOR_PAIR(s->foreground[s->char_width*char_y + char_x]*8 + s->background[s->char_width*char_y + char_x] + CAM_color_start));
 			wprintw(s->parent, "%c", s->current_characters[s->char_width*char_y + char_x]);
 		}
 		wprintw(s->parent, "\n");
