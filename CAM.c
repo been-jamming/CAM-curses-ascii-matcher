@@ -257,7 +257,7 @@ void CAM_update(CAM_screen *s){
 	unsigned char char_x;
 	unsigned char char_y;
 
-	move(0, 0);
+	wmove(s->parent, 0, 0);
 	for(char_y = 0; char_y < s->char_height; char_y++){
 		for(char_x = 0; char_x < s->char_width; char_x++){
 			if(s->do_update[s->char_width*char_y + char_x]){
