@@ -24,6 +24,8 @@ void CAM_screen_free(CAM_screen *s);
 
 void CAM_set_pix(CAM_screen *s, unsigned int x, unsigned int y, unsigned char color);
 
+unsigned char CAM_get_pix(CAM_screen *s, unsigned int x, unsigned int y);
+
 void CAM_fill(CAM_screen *s, unsigned int color);
 
 void CAM_fill_char(CAM_screen *s, unsigned int char_x, unsigned int char_y, unsigned char color);

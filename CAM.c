@@ -88,6 +88,34 @@ void CAM_set_pix(CAM_screen *s, unsigned int x, unsigned int y, unsigned char co
 	s->do_update[s->char_width*char_y + char_x] = 1;
 }
 
+unsigned char CAM_get_pix(CAM_screen *s, unsigned int x, unsigned int y){
+	unsigned int char_x;
+	unsigned int char_y;
+	unsigned char char_x_offset;
+	unsigned char char_y_offset;
+	uint64_t color_bits;
+	unsigned char color = 0;
+
+	char_x = x/8;
+	char_x_offset = x%8;
+	char_y = y/13;
+	char_y_offset = y%13;
+
+	color_bits = s->current_buffer[s->char_width*char_y + char_x][char_y_offset]&(0x8080808080808080ULL>>char_x_offset);
+
+	if(color_bits&0xFFFFFFFF00000000ULL){
+		color += 4;
+	}
+	if(color_bits&0xFFFF0000FFFF0000ULL){
+		color += 2;
+	}
+	if(color_bits&0xFF00FF00FF00FF00ULL){
+		color += 1;
+	}
+
+	return color;
+}
+
 void CAM_fill(CAM_screen *s, unsigned int color){
 	unsigned int i;
 	unsigned int j;

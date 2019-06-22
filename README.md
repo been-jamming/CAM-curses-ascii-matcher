@@ -38,6 +38,10 @@ Frees the `CAM_screen` associated with the handle `s`. Must be called before the
 
 Sets a pixel on the screen `s`. `x` is the x coordinate of the pixel to be set on the virtual screen. `y` is the y coordinate of the pixel to be set. The coordinates are not given in character coordinates, but virtual screen coordinates. That means that the coordinate `(2, 2)` is still a pixel within the top left character. `color` is the color that the pixel should be set to. Valid colors are colors `0` through `7`. One can use the constants such as `COLOR_WHITE` given by the curses library to define the color. If the coordinate lies off of the screen, the results of this function are undefined.
 
+```unsigned char CAM_get_pix(CAM_screen *s, unsigned int x, unsigned int y);```
+
+Returns the color of a pixel on screen `s`. `x` is the x coordinate of the pixel to be tested, and `y` is the y coordinate. The colors of the pixels are undefined when the screen is created, even if the screen displays as black when the screen is updated. A pixel's color is only defined once it has been drawn to using a function such as `CAM_fill`.
+
 ```void CAM_fill(CAM_screen *s, unsigned int color);```
 
 Fills a screen `s` with the color `color`. This function is much more efficient than calling `CAM_rect` to fill the entire screen. This can be used at the beginning of a frame update for a game to clear the screen before redrawing.
