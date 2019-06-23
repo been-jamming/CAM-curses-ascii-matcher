@@ -9,6 +9,69 @@
 
 static unsigned int CAM_color_start;
 
+struct bresenham_state{
+	int x0;
+	int x1;
+	int y0;
+	int y1;
+	int diff;
+	int dx;
+	int dy;
+	char y_inc;
+	int current_x;
+	int current_y;
+	unsigned char done;
+};
+
+static struct bresenham_state create_bresenham_state(int x0, int y0, int x1, int y1){
+	int temp;
+	struct bresenham_state output;
+
+	if(x0 > x1){
+		temp = x1;
+		x1 = x0;
+		x0 = temp;
+		temp = y1;
+		y1 = y0;
+		y0 = temp;
+	}
+	
+	output = (struct bresenham_state) {.x0 = x0, .y0 = y0, .x1 = x1, .y1 = y1, .done = 0};
+	output.dx = x1 - x0;
+	output.dy = y1 - y0;
+	if(output.dy < 0){
+		output.y_inc = -1;
+		output.dy = -output.dy;
+	} else {
+		output.y_inc = 1;
+	}
+	output.diff = 2*output.dx - output.dy;
+	output.current_x = x0;
+	output.current_y = y0;
+
+	return output;
+}
+
+static void next_bresenham_state(struct bresenham_state *state){
+	if(state->diff >= 0){
+		state->current_y += state->y_inc;
+		state->diff -= 2*state->dx;
+	}
+	if(state->diff < 0){
+		state->current_x++;
+		state->diff += 2*state->dy;
+	}
+	if(state->y_inc == 1){
+		if(state->current_y > state->y1 || state->current_x > state->x1){
+			state->done = 1;
+		}
+	} else {
+		if(state->current_y < state->y1 || state->current_x > state->x1){
+			state->done = 1;
+		}
+	}
+}
+
 unsigned char CAM_init(unsigned int color_start){
 	unsigned char i;
 	unsigned char j;
@@ -140,6 +203,144 @@ void CAM_fill_char(CAM_screen *s, unsigned int char_x, unsigned int char_y, unsi
 	}
 	s->current_characters[s->char_width*char_y + char_x] = ' ';
 	s->background[s->char_width*char_y + char_x] = color;
+	s->do_update[s->char_width*char_y + char_x] = 0;
+}
+
+void CAM_vertical_line(CAM_screen *s, unsigned int x, unsigned int y0, unsigned int y1, unsigned char color){
+	unsigned int y;
+
+	if(y0 > y1){
+		y = y0;
+		y0 = y1;
+		y1 = y;
+	}
+
+	for(y = y0; y <= y1; y++){
+		CAM_set_pix(s, x, y, color);
+	}
+}
+
+void CAM_horizontal_line(CAM_screen *s, unsigned int x0, unsigned int x1, unsigned int y, unsigned char color){
+	unsigned char mask_x0;
+	unsigned char mask_x1;
+	unsigned char mask;
+	uint64_t mask64;
+	uint64_t mask64_x0 = 0;
+	uint64_t mask64_x1 = 0;
+	unsigned int char_x0;
+	unsigned int char_x1;
+	unsigned int char_y;
+	unsigned int i;
+	unsigned int temp_x;
+
+	if(x0 > x1){
+		temp_x = x0;
+		x0 = x1;
+		x1 = temp_x;
+	}
+
+	mask_x0 = 0xFF>>(x0%8);
+	mask_x1 = 0xFF<<(7 - x1%8);
+
+	for(i = 0; i < 8; i++){
+		mask64_x0 <<= 8;
+		mask64_x1 <<= 8;
+
+		mask64_x0 |= mask_x0;
+		mask64_x1 |= mask_x1;
+	}
+
+	char_x0 = x0/8;
+	char_x1 = x1/8;
+	char_y = y/13;
+
+	for(i = char_x0; i <= char_x1; i++){
+		mask = 0xFF;
+		mask64 = 0xFFFFFFFFFFFFFFFFULL;
+		if(i == char_x0){
+			mask &= mask_x0;
+			mask64 &= mask64_x0;
+		}
+		if(i == char_x1){
+			mask &= mask_x1;
+			mask64 &= mask64_x1;
+		}
+		s->current_buffer[s->char_width*char_y + i][y%13] &= ~mask64;
+		s->current_buffer[s->char_width*char_y + i][y%13] |= ((uint64_t) mask)<<(8*color);
+		s->do_update[s->char_width*char_y + i] = 1;
+	}
+}
+
+void CAM_line(CAM_screen *s, int x0, int y0, int x1, int y1, unsigned char color){
+	struct bresenham_state state;
+
+	state = create_bresenham_state(x0, y0, x1, y1);
+	while(!state.done){
+		CAM_set_pix(s, state.current_x, state.current_y, color);
+		next_bresenham_state(&state);
+	}
+}
+
+void CAM_flat_triangle(CAM_screen *s, int corner_x, int corner_y, int x, int y0, int y1, unsigned char color){
+	struct bresenham_state state0;
+	struct bresenham_state state1;
+	int current_x;
+
+	state0 = create_bresenham_state(corner_x, corner_y, x, y0);
+	state1 = create_bresenham_state(corner_x, corner_y, x, y1);
+	current_x = state0.current_x;
+
+	while(!state0.done){
+		CAM_vertical_line(s, current_x, state0.current_y, state1.current_y, color);
+		while(state0.current_x == current_x && !state0.done){
+			next_bresenham_state(&state0);
+		}
+		while(state1.current_x == current_x){
+			next_bresenham_state(&state1);
+		}
+		if(state0.dx > 0){
+			current_x++;
+		} else {
+			current_x--;
+		}
+	}
+}
+
+void CAM_triangle(CAM_screen *s, int x0, int y0, int x1, int y1, int x2, int y2, unsigned char color){
+	int middle_x = 0;
+	int middle_y = 0;
+	int corner1_x = 0;
+	int corner1_y = 0;
+	int corner2_x = 0;
+	int corner2_y = 0;
+	int split_y = 0;
+
+	if((x0 >= x1 && x0 <= x2) || (x0 >= x2 && x0 <= x1)){
+		middle_x = x0;
+		middle_y = y0;
+		corner1_x = x1;
+		corner1_y = y1;
+		corner2_x = x2;
+		corner2_y = y2;
+	} else if((x1 >= x0 && x1 <= x2) || (x1 >= x2 && x1 <= x0)){
+		middle_x = x1;
+		middle_y = y1;
+		corner1_x = x0;
+		corner1_y = y0;
+		corner2_x = x2;
+		corner2_y = y2;
+	} else if((x2 >= x0 && x2 <= x1) || (x2 >= x1 && x2 <= x0)){
+		middle_x = x2;
+		middle_y = y2;
+		corner1_x = x0;
+		corner1_y = y0;
+		corner2_x = x2;
+		corner2_y = y2;
+	}
+
+	split_y = corner2_y - (corner1_y - corner2_y)*(corner2_x - middle_x)/(corner1_x - corner2_x);
+	CAM_flat_triangle(s, corner1_x, corner1_y, middle_x, middle_y, split_y, color);
+	CAM_flat_triangle(s, corner2_x, corner2_y, middle_x, middle_y, split_y, color);
 }
 
 void CAM_rect(CAM_screen *s, int x0, int y0, int x1, int y1, unsigned char color){

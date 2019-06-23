@@ -30,6 +30,14 @@ void CAM_fill(CAM_screen *s, unsigned int color);
 
 void CAM_fill_char(CAM_screen *s, unsigned int char_x, unsigned int char_y, unsigned char color);
 
+void CAM_horizontal_line(CAM_screen *s, unsigned int x0, unsigned int x1, unsigned int y, unsigned char color);
+
+void CAM_line(CAM_screen *s, int x0, int y0, int x1, int y1, unsigned char color);
+
+void CAM_flat_triangle(CAM_screen *s, int corner_x, int corner_y, int x0, int y0, int y1, unsigned char color);
+
+void CAM_triangle(CAM_screen *s, int x0, int y0, int x1, int y1, int x2, int y2, unsigned char color);
+
 void CAM_rect(CAM_screen *s, int x0, int y0, int x1,  int y1, unsigned char color);
 
 void CAM_update_char(CAM_screen *s, unsigned int char_x, unsigned int char_y);
