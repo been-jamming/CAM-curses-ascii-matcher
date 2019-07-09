@@ -268,7 +268,7 @@ triangle *allocate_shape(int x0, int y0, int z0, int x1, int y1, int z1, int x2,
 	return output;
 }
 
-triangle create_shape(int x0, int y0, int z0, int x1, int y1, int z1, int x2, int y2, int z2, unsigned char color){
+triangle create_shape(double x0, double y0, double z0, double x1, double y1, double z1, double x2, double y2, double z2, unsigned char color){
 	triangle output;
 
 	output.p0.x = x0; output.p0.y = y0; output.p0.z = z0;
@@ -319,37 +319,6 @@ void draw_shapes(CAM_screen *s, double fov, triangle *t, unsigned int num_shapes
 
 	for(i = 0; i < num_shapes; i++){
 		draw_triangle(s, t + i, fov, (t + i)->color);
-	}
-}
-
-void draw_shape(CAM_screen *s, double fov, triangle *t){
-	while(t){
-		calculate_normal_triangle(t);
-		if(dot_3d(t->center, t->normal) < 0){
-			draw_triangle(s, t, fov, t->color);
-		}
-		t = t->next;
-	}
-}
-
-void rotate_shape_x(triangle *t, vector3d center, double angle){
-	while(t){
-		rotate_triangle_x(t, center, angle);
-		t = t->next;
-	}
-}
-
-void rotate_shape_y(triangle *t, vector3d center, double angle){
-	while(t){
-		rotate_triangle_y(t, center, angle);
-		t = t->next;
-	}
-}
-
-void rotate_shape_z(triangle *t, vector3d center, double angle){
-	while(t){
-		rotate_triangle_z(t, center, angle);
-		t = t->next;
 	}
 }
 

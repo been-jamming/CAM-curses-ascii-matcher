@@ -1,3 +1,5 @@
+#ifndef CAM_INCLUDED
+#define CAM_INCLUDED
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -43,4 +45,4 @@ void CAM_rect(CAM_screen *s, int x0, int y0, int x1,  int y1, unsigned char colo
 void CAM_update_char(CAM_screen *s, unsigned int char_x, unsigned int char_y);
 
 void CAM_update(CAM_screen *s);
-
+#endif

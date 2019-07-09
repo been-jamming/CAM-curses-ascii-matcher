@@ -35,3 +35,7 @@ void rotate_triangle_y(triangle *t, vector3d center, double angle);
 
 void rotate_triangle_z(triangle *t, vector3d center, double angle);
 
+triangle create_shape(double x0, double y0, double z0, double x1, double y1, double z1, double x2, double y2, double z2, unsigned char color);
+
+void draw_shapes(CAM_screen *s, double fov, triangle *t, unsigned int num_shapes);
+
