@@ -322,7 +322,7 @@ void draw_shapes(CAM_screen *s, double fov, triangle *t, unsigned int num_shapes
 	}
 }
 
-int test(int argc, char **argv){
+int main(){
 	CAM_screen *screen;
 	triangle cube[4];
 	vector3d center;
