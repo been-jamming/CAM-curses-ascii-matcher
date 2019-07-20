@@ -69,7 +69,7 @@ unsigned char CAM_init(unsigned int color_start){
 	unsigned char current_color;
 	uint64_t current_line;
 
-	if(!has_colors() || COLOR_PAIRS < 65){
+	if(!has_colors()){
 		return 1;
 	}
 
