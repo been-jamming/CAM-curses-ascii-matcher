@@ -492,8 +492,8 @@ void CAM_update_char(CAM_screen *s, unsigned int char_x, unsigned int char_y){
 }
 
 void CAM_update(CAM_screen *s){
-	unsigned char char_x;
-	unsigned char char_y;
+	unsigned int char_x;
+	unsigned int char_y;
 
 	wmove(s->parent, 0, 0);
 	for(char_y = 0; char_y < s->char_height; char_y++){
