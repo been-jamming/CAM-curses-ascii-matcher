@@ -502,7 +502,7 @@ void CAM_update(CAM_screen *s){
 				CAM_update_char(s, char_x, char_y);
 				s->do_update[s->char_width*char_y + char_x] = 0;
 			}
-			attron(COLOR_PAIR(s->foreground[s->char_width*char_y + char_x]*8 + s->background[s->char_width*char_y + char_x] + CAM_color_start));
+			wattron(s->parent, COLOR_PAIR(s->foreground[s->char_width*char_y + char_x]*8 + s->background[s->char_width*char_y + char_x] + CAM_color_start));
 			wprintw(s->parent, "%c", s->current_characters[s->char_width*char_y + char_x]);
 		}
 		wprintw(s->parent, "\n");
