@@ -287,6 +287,10 @@ void CAM_flat_triangle(CAM_screen *s, int corner_x, int corner_y, int x0, int x1
 	struct bresenham_state state1;
 	int current_y;
 
+	if(corner_y == y || x0 == x1){
+		return;
+	}
+
 	state0 = create_bresenham_state(corner_x, corner_y, x0, y);
 	state1 = create_bresenham_state(corner_x, corner_y, x1, y);
 	current_y = state0.current_y;
