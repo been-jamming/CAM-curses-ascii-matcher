@@ -83,7 +83,7 @@ unsigned char CAM_init(unsigned int color_start){
 
 	CAM_color_start = color_start;
 
-	for(i = 0; i < 96; i++){
+	for(i = 0; i < 95; i++){
 		for(j = 0; j < 13; j++){
 			current_line = 0;
 			for(k = 0; k < 8; k++){
