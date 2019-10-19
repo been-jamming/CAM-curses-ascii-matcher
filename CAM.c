@@ -220,7 +220,7 @@ void CAM_vertical_line(CAM_screen *s, int x, int y0, int y1, unsigned char color
 	}
 }
 
-void CAM_horizontal_line(CAM_screen *s, unsigned int x0, unsigned int x1, unsigned int y, unsigned char color){
+void CAM_horizontal_line(CAM_screen *s, int x0, int x1, int y, unsigned char color){
 	unsigned char mask_x0;
 	unsigned char mask_x1;
 	unsigned char mask;
@@ -233,10 +233,27 @@ void CAM_horizontal_line(CAM_screen *s, unsigned int x0, unsigned int x1, unsign
 	unsigned int i;
 	unsigned int temp_x;
 
+	if(y < 0 || y >= s->height){
+		return;
+	}
+
 	if(x0 > x1){
 		temp_x = x0;
 		x0 = x1;
 		x1 = temp_x;
+	}
+
+	if(x0 >= s->width){
+		return;
+	}
+	if(x0 < 0){
+		x0 = 0;
+	}
+	if(x1 < 0){
+		return;
+	}
+	if(x1 >= s->width){
+		x1 = s->width - 1;
 	}
 
 	mask_x0 = 0xFF>>(x0%8);
@@ -280,6 +297,34 @@ void CAM_line(CAM_screen *s, int x0, int y0, int x1, int y1, unsigned char color
 		next_bresenham_state(&state);
 	}
 	CAM_set_pix(s, state.current_x, state.current_y, color);
+}
+
+void CAM_circle(CAM_screen *s, int x0, int y0, int radius, unsigned char color){
+	int x;
+	int y;
+	int x_change;
+	int y_change;
+	int radius_error;
+
+	x = radius;
+	y = 0;
+	x_change = 1 - 2*radius;
+	y_change = 1;
+	radius_error = 0;
+	while(x >= y){
+		CAM_horizontal_line(s, x0 - x, x0 + x, y0 + y, color);
+		CAM_horizontal_line(s, x0 - x, x0 + x, y0 - y, color);
+		CAM_horizontal_line(s, x0 - y, x0 + y, x0 + x, color);
+		CAM_horizontal_line(s, x0 - y, x0 + y, x0 - x, color);
+		y++;
+		radius_error += y_change;
+		y_change += 2;
+		if(2*radius_error + x_change > 0){
+			x--;
+			radius_error += x_change;
+			x_change += 2;
+		}
+	}
 }
 
 void CAM_flat_triangle(CAM_screen *s, int corner_x, int corner_y, int x0, int x1, int y, unsigned char color){
