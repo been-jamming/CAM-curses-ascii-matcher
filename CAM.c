@@ -314,8 +314,8 @@ void CAM_circle(CAM_screen *s, int x0, int y0, int radius, unsigned char color){
 	while(x >= y){
 		CAM_horizontal_line(s, x0 - x, x0 + x, y0 + y, color);
 		CAM_horizontal_line(s, x0 - x, x0 + x, y0 - y, color);
-		CAM_horizontal_line(s, x0 - y, x0 + y, x0 + x, color);
-		CAM_horizontal_line(s, x0 - y, x0 + y, x0 - x, color);
+		CAM_horizontal_line(s, x0 - y, x0 + y, y0 + x, color);
+		CAM_horizontal_line(s, x0 - y, x0 + y, y0 - x, color);
 		y++;
 		radius_error += y_change;
 		y_change += 2;
