@@ -62,32 +62,22 @@ Matches a character on screen `s` at character coordinates `char_x` and `char_y`
 
 For a given screen `s`, the function updates every character using `CAM_update_char` and displays the characters in the parent `WINDOW` starting from the top left character. The window still needs to be refreshed using the curses library to display the results.
 
-```
-void CAM_set_pixel_handler(unsigned char (*pixel_handler)(unsigned int x, unsigned int y, unsigned char color));
-```
+```void CAM_set_pixel_handler(unsigned char (*pixel_handler)(unsigned int x, unsigned int y, unsigned char color));```
 
 Sets the pixel handler for screen upates to `pixel_handler`. The pixel handler is a function that is called for every pixel which is attempted to be drawn to. When drawing to any virtual screen, the function is passed the x and y coordinates, as well as the color that is being attempted to draw to the pixel. If the function returns a non-zero value, the pixel is updated, otherwise the pixel on the virtual screen remains the color it was before.
 
-```
-void CAM_unset_pixel_handler();
-```
+```void CAM_unset_pixel_handler();```
 
 Removes any pixel handler being used. Drawing without a pixel handler is much more efficient than drawing with one, so when a pixel handler is not being used, it should be removed with this function.
 
-```
-void CAM_vertical_line(CAM_screen *s, int x, int y0, int y1, unsigned char color);
-```
+```void CAM_vertical_line(CAM_screen *s, int x, int y0, int y1, unsigned char color);```
 
 Draws a vertical line on the screen `s` from the point `(x, y0)` to `(x, y1)`. The line is clipped, so the coordinates `(x, y0)` and `(x, y1)` may be off-screen. It doesn't matter whether `y0 < y1`. 
 
-```
-void CAM_horizontal_line(CAM_screen *s, int x0, int x1, int y, unsigned char color);
-```
+```void CAM_horizontal_line(CAM_screen *s, int x0, int x1, int y, unsigned char color);```
 
 Draws a horizontal line on the screen `s` from the point `(x0, y)` to `(x1, y)`. The line is clipped, so the coordinates `(x0, y)` and `(x1, y)` may be off-screen. It doesn't matter whether `x0 < x1`.
 
-```
-void CAM_line(CAM_screen *s, int x0, int y0, int x1, int y1, unsigned char color);
-```
+```void CAM_line(CAM_screen *s, int x0, int y0, int x1, int y1, unsigned char color);```
 
 Draws a line on the screen `s` from the point `(x0, y0)` to `(x1, y1)` with color `color`.
