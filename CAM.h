@@ -24,6 +24,8 @@ CAM_screen *CAM_screen_create(WINDOW *parent, unsigned int char_width, unsigned 
 
 void CAM_screen_free(CAM_screen *s);
 
+void CAM_dirty_screen(CAM_screen *s);
+
 void CAM_set_pixel_handler(unsigned char (*pixel_handler)(unsigned int x, unsigned int y, unsigned char color));
 
 void CAM_unset_pixel_handler();

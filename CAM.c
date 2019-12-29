@@ -129,6 +129,17 @@ void CAM_screen_free(CAM_screen *s){
 	free(s);
 }
 
+void CAM_dirty_screen(CAM_screen *s){
+	int char_x;
+	int char_y;
+
+	for(char_x = 0; char_x < s->char_width; char_x++){
+		for(char_y = 0; char_y < s->char_height; char_y++){
+			s->do_update[s->char_width*char_y + char_x] = 1;
+		}
+	}
+}
+
 void CAM_set_pixel_handler(unsigned char (*pixel_handler)(unsigned int x, unsigned int y, unsigned char color)){
 	CAM_pixel_handler = pixel_handler;
 	CAM_do_pixel_handler = 1;
