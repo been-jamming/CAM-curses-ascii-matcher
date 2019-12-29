@@ -19,7 +19,7 @@ struct bresenham_state{
 	int diff;
 	int dx;
 	int dy;
-	char x_inc;
+	int x_inc;
 	int current_x;
 	int current_y;
 };
