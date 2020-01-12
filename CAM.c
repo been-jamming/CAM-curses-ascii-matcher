@@ -105,6 +105,9 @@ CAM_screen *CAM_screen_create(WINDOW *parent, unsigned int char_width, unsigned 
 	CAM_screen *output;
 
 	output = malloc(sizeof(CAM_screen));
+	if(!output){
+		return NULL;
+	}
 	output->parent = parent;
 	output->char_width = char_width;
 	output->char_height = char_height;
@@ -112,6 +115,10 @@ CAM_screen *CAM_screen_create(WINDOW *parent, unsigned int char_width, unsigned 
 	output->height = char_height*13;
 	output->do_update = calloc(char_width*char_height, sizeof(unsigned char));
 	output->current_characters = malloc(char_width*char_height*sizeof(char));
+	if(!output->current_characters){
+		free(output);
+		return NULL;
+	}
 	memset(output->current_characters, ' ', char_width*char_height*sizeof(char));
 	output->foreground = calloc(char_width*char_height, sizeof(unsigned char));
 	output->background = calloc(char_width*char_height, sizeof(unsigned char));
